@@ -8,8 +8,8 @@ import java.util.List;
 @Entity
 @Data
 public class User extends BaseModel{
-    private String Name;
-    private String Email;
+    private String name;
+    private String email;
     private String hashedPassword;
     @ManyToMany
     private List<Roles> roles;
