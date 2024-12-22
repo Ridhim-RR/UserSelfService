@@ -3,6 +3,6 @@ package com.example.userselfservice.Dtos;
 import lombok.Data;
 
 @Data
-public class logoutRequestDto {
+public class LogOutRequestDto {
     private String token;
 }

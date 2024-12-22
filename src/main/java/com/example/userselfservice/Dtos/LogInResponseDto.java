@@ -6,13 +6,13 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class LoginResDto {
+public class LogInResponseDto {
     private String token;
     private Boolean isValid;
     private Date expiry;
 
-    public static LoginResDto from(Token token) {
-        LoginResDto res = new LoginResDto();
+    public static LogInResponseDto from(Token token) {
+        LogInResponseDto res = new LogInResponseDto();
         res.setToken(token.getToken());
         res.setIsValid(token.isValid());
         res.setExpiry(token.getExpiry());
