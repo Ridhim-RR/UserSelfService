@@ -1,11 +1,15 @@
 package com.example.userselfservice.Services;
 
+import com.example.userselfservice.Config.KafkaProducerClient;
+import com.example.userselfservice.Dtos.SendEmailDto;
 import com.example.userselfservice.Exceptions.InvalidInputException;
 import com.example.userselfservice.Exceptions.UserAlreadyExistsException;
 import com.example.userselfservice.Models.Token;
 import com.example.userselfservice.Models.User;
 import com.example.userselfservice.Repo.TokenRepo;
 import com.example.userselfservice.Repo.UserRepo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,10 +27,14 @@ public class UserService {
     private UserRepo userRepo;
     private TokenRepo tokenRepo;
 
-    UserService(BCryptPasswordEncoder encoder, UserRepo userRepo, TokenRepo tokenRepo) {
+    private KafkaProducerClient kafkaProducerClient;
+    private ObjectMapper objectMapper;
+    UserService(BCryptPasswordEncoder encoder, UserRepo userRepo, TokenRepo tokenRepo, KafkaProducerClient kafkaProducerClient,ObjectMapper objectMapper) {
         this.encoder = encoder;
         this.userRepo = userRepo;
         this.tokenRepo = tokenRepo;
+        this.kafkaProducerClient = kafkaProducerClient;
+        this.objectMapper = objectMapper;
     }
 
     public User signup(String email,String name,String password) throws UserAlreadyExistsException {
@@ -38,6 +46,20 @@ public class UserService {
         newUser.setEmail(email);
         newUser.setName(name);
         newUser.setHashedPassword(encoder.encode(password));
+//        Send Notification to the user:::
+  System.out.println(newUser + "Newwwwwwwwwwwwwwwwwwwwwwwww");
+        try {
+            SendEmailDto sendEmailDto = new SendEmailDto();
+            sendEmailDto.setTo(newUser.getEmail());
+            sendEmailDto.setFrom("admin@admin.com");
+            sendEmailDto.setSubject("Welcome to our site:");
+            sendEmailDto.setBody("Thanks for signing in....");
+            System.out.println(sendEmailDto +"ZDDDDDDDD");
+            kafkaProducerClient.sendMessage("sendEmails",objectMapper.writeValueAsString(sendEmailDto));
+        } catch (JsonProcessingException e) {
+            System.out.println(e.getMessage() + ":: errorrr");
+            throw new RuntimeException(e);
+        }
         return  userRepo.save(newUser);
     }
 
