@@ -5,6 +5,7 @@ import com.example.userselfservice.Dtos.ResponseStatus;
 import com.example.userselfservice.Models.Token;
 import com.example.userselfservice.Models.User;
 import com.example.userselfservice.Services.UserService;
+import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 public class UserController  {
+    private final TransactionAutoConfiguration.EnableTransactionManagementConfiguration.CglibAutoProxyConfiguration cglibAutoProxyConfiguration;
     private UserService userService;
-    UserController(UserService userService) {
+    UserController(UserService userService, TransactionAutoConfiguration.EnableTransactionManagementConfiguration.CglibAutoProxyConfiguration cglibAutoProxyConfiguration) {
         this.userService = userService;
+        this.cglibAutoProxyConfiguration = cglibAutoProxyConfiguration;
     }
 
     @PostMapping("/signup")
@@ -22,7 +25,8 @@ public class UserController  {
         User user = userService.signup(
                 requestDto.getEmail(),
                 requestDto.getName(),
-                requestDto.getPassword()
+                requestDto.getPassword(),
+                requestDto.getRoles()
         );
 
         return SignUpResponseDto.from(user);
@@ -49,9 +53,9 @@ public class UserController  {
 
     @GetMapping("/validate/{token}")
     public SignUpResponseDto validateToken(@PathVariable String token) {
+        System.out.println(token+ "TOkeneeee");
         User user = userService.validateToken(token);
         return SignUpResponseDto.from(user);
-//        return  null;
     }
 }
 

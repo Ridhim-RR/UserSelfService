@@ -13,6 +13,4 @@ public class Token extends BaseModel {
     private boolean isValid;
     @ManyToOne
     private User user;
-
-
 }
